@@ -1,0 +1,2 @@
+Implementuj Stage 04 – ověření widget session tokenu + tenant context dependency. Postupuj podle Agent.md workflow a DoD.
+Pokud neexistuje docs/stages/04-widget-auth.md, vytvoř ho z docs/stages/_template.md a vyplň. Standardizuj přenos tokenu přes hlavičku Authorization: Bearer <token>, přidej ověřovací dependency pro všechny budoucí /widget/* endpointy a přidej aspoň jeden chráněný endpoint pro ověření (např. GET /widget/whoami). Doplň cheap testy a aktualizuj CORS tak, aby prohlížeč mohl posílat Authorization header.

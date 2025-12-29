@@ -32,7 +32,11 @@ Při zadání nové etapy od uživatele:
 1) Implementuj pouze scope, který je výslovně uveden v promptu.
 2) Přidej/aktualizuj testy, pokud je to rozumné (cheap tests).
 3) Přidej/aktualizuj Alembic migrace (pokud se mění DB).
-4) Aktualizuj `docs/stages/<NN>-<nazev>.md`:
+4) Udržuj `docs/stages/<NN>-<nazev>.md`:
+   - Pokud soubor pro danou etapu ještě neexistuje, vytvoř ho z `docs/stages/_template.md`:
+     - zkopíruj šablonu
+     - doplň všechny placeholdery podle aktuálního zadání (promptu)
+     - pojmenuj soubor jako `<NN>-<kebab-case>.md` (např. `03-widget-session.md`)
    - Cíl etapy
    - Co se změnilo
    - Jak spustit
@@ -92,13 +96,28 @@ Pokud je úkolem vytvořit Mermaid diagram nebo generovat Markdown odkazy:
 - Nepřepisovat strukturu projektu „pro jistotu“
 - Nezavádět nové knihovny bez důvodu uvedeného v promptu
 
-## 10) Git workflow (pro začátek)
-- Nesmíš používat příkazy git clean, git reset --hard, rm -rf, ani mazat soubory mimo scope
-- Používej branch per stage: `stage/NN-name`.
-- Před každým commitem: `git status` a zkontroluj diff (`git diff`).
-- Nikdy nepoužívej `rebase`, `reset --hard`, ani `push --force` bez výslovného pokynu uživatele.
-- Na konci etapy navrhni:
-  - přesné git příkazy (step-by-step)
-  - doporučenou commit message (Conventional Commits)
-  - co zkontrolovat před merge do main
-- Pokud dojde ke konfliktu, navrhni bezpečný postup řešení.
+## 10) Git workflow (povinné)
+- Používej branch per stage: `stage/NN-name` (např. `stage/03-widget-session`), vždy vytvořenou z aktuálního `main`.
+- Základní postup (spusť lokálně a uveď výsledek, pokud je to možné):
+  1) `git checkout main`
+  2) `git pull --ff-only`
+  3) `git checkout -b stage/NN-name`
+- Během práce:
+  - Dělej malé, logické commity (žádné `WIP`).
+  - Před každým commitem:
+    - `git status`
+    - `git diff` (zkontroluj, že změny odpovídají scope)
+    - spusť dostupné testy / kontroly (např. `pytest`, `ruff`, `mypy`), nebo to výslovně uveď, pokud v projektu zatím nejsou.
+  - Dodrž Conventional Commits (např. `feat(widget): add widget session endpoint`).
+  - Nikdy necommituj secrets (`.env`, klíče, tokeny). Pokud přidáváš konfiguraci, aktualizuj `.env.example` bez tajných hodnot.
+- Zakázané bez výslovného pokynu uživatele:
+  - `rebase`
+  - `reset --hard`
+  - `push --force`
+- Na konci etapy:
+  - Repo musí být čisté (`git status` bez změn).
+  - Navrhni nebo rovnou připrav commit(y) a uveď:
+    - přesné git příkazy (step-by-step) k pushnutí větve (např. `git push -u origin stage/NN-name`)
+    - doporučenou commit message / seznam commitů
+    - kontrolní seznam před merge do `main` (tests passing, docs updated, `.env.example` updated, migrace přítomné).
+- Pokud dojde ke konfliktu, navrhni bezpečný postup řešení (bez rebase/force).
