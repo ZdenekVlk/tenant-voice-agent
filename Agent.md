@@ -93,6 +93,7 @@ Pokud je úkolem vytvořit Mermaid diagram nebo generovat Markdown odkazy:
 - Nezavádět nové knihovny bez důvodu uvedeného v promptu
 
 ## 10) Git workflow (pro začátek)
+- Nesmíš používat příkazy git clean, git reset --hard, rm -rf, ani mazat soubory mimo scope
 - Používej branch per stage: `stage/NN-name`.
 - Před každým commitem: `git status` a zkontroluj diff (`git diff`).
 - Nikdy nepoužívej `rebase`, `reset --hard`, ani `push --force` bez výslovného pokynu uživatele.
