@@ -43,6 +43,7 @@ Při zadání nové etapy od uživatele:
    - Jak otestovat
    - Známá omezení + TODO
 5) Připrav návrh commit message (Conventional Commits).
+6) Pred spustenim testu aktivuj lokalni virtualni prostredi z `.venv/`.
 
 ### Požadovaný formát závěrečné odpovědi (vždy česky)
 Na konci každého úkolu odpověz **česky** a dodrž tento formát:
