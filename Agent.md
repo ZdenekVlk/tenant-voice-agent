@@ -33,7 +33,7 @@ Při zadání nové etapy od uživatele:
 2) Přidej/aktualizuj testy, pokud je to rozumné (cheap tests).
 3) Přidej/aktualizuj Alembic migrace (pokud se mění DB).
 4) Udržuj `docs/stages/<NN>-<nazev>.md`:
-   - Pokud soubor pro danou etapu ještě neexistuje, vytvoř ho z `docs/stages/_template.md`:
+   - Pokud soubor pro danou etapu ještě neexistuje, vytvoř ho z `docs/_template.md`:
      - zkopíruj šablonu
      - doplň všechny placeholdery podle aktuálního zadání (promptu)
      - pojmenuj soubor jako `<NN>-<kebab-case>.md` (např. `03-widget-session.md`)
