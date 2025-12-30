@@ -7,7 +7,7 @@ from uuid import uuid4
 import jwt
 import pytest
 
-os.environ.setdefault("DATABASE_URL", "postgresql://test")
+os.environ.setdefault("DATABASE_URL", "postgresql+psycopg://test")
 os.environ.setdefault("WIDGET_SESSION_JWT_SECRET", "test-secret")
 os.environ.setdefault("WIDGET_SESSION_JWT_ALG", "HS256")
 os.environ.setdefault("WIDGET_SESSION_TTL_MINUTES", "10")

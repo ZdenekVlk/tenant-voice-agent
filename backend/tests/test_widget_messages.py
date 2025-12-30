@@ -5,7 +5,7 @@ from uuid import UUID, uuid4
 
 from fastapi.testclient import TestClient
 
-os.environ.setdefault("DATABASE_URL", "postgresql://test")
+os.environ.setdefault("DATABASE_URL", "postgresql+psycopg://test")
 os.environ.setdefault("WIDGET_SESSION_JWT_SECRET", "test-secret")
 os.environ.setdefault("WIDGET_SESSION_JWT_ALG", "HS256")
 os.environ.setdefault("WIDGET_SESSION_TTL_MINUTES", "10")
