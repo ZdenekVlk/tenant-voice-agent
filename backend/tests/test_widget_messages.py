@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import json
 import os
 from uuid import UUID, uuid4
 
@@ -84,7 +85,10 @@ def test_create_widget_message_happy_path() -> None:
     assert params["conversation_id"] == str(conversation_id)
     assert params["role"] == "user"
     assert params["content"] == "hello"
-    assert params["meta"] == {"a": 1}
+    if isinstance(params["meta"], str):
+        assert json.loads(params["meta"]) == {"a": 1}
+    else:
+        assert params["meta"] == {"a": 1}
 
 
 def test_create_widget_message_invalid_text_returns_400() -> None:
