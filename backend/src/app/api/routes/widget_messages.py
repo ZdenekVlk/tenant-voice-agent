@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import json
 import logging
 from typing import Any
 
@@ -36,7 +37,7 @@ def create_widget_message(
         result = db.execute(
             text(
                 "INSERT INTO messages (tenant_id, conversation_id, role, content, meta) "
-                "VALUES (:tenant_id, :conversation_id, :role, :content, :meta) "
+                "VALUES (:tenant_id, :conversation_id, :role, :content, CAST(:meta AS JSONB)) "
                 "RETURNING id"
             ),
             {
@@ -44,7 +45,7 @@ def create_widget_message(
                 "conversation_id": str(session.conversation_id),
                 "role": "user",
                 "content": trimmed_text,
-                "meta": metadata,
+                "meta": json.dumps(metadata),
             },
         )
         message_id = result.scalar_one()

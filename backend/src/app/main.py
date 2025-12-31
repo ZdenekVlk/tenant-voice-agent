@@ -10,8 +10,8 @@ def create_app() -> FastAPI:
     app.add_middleware(
         CORSMiddleware,
         allow_origins=["*"],
-        allow_methods=["GET", "POST", "OPTIONS"],
-        allow_headers=["Authorization", "Content-Type"],
+        allow_methods=["*"],
+        allow_headers=["*"],
     )
 
     for router in routers:

@@ -1,0 +1,45 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Tenant Voice Agent - Widget</title>
+    <link rel="stylesheet" href="./src/styles.css" />
+  </head>
+  <body>
+    <main class="widget">
+      <header class="widget__header">
+        <h1>Tenant Voice Agent</h1>
+        <p>Minimal widget UI (session, send message, render).</p>
+      </header>
+
+      <section class="widget__panel">
+        <div class="field">
+          <label for="apiBase">API base URL</label>
+          <input id="apiBase" type="url" value="http://localhost:8000" />
+        </div>
+        <button id="startSessionBtn" type="button">Start session</button>
+        <div id="sessionStatus" class="status">Session: not started</div>
+        <div id="sessionMeta" class="meta"></div>
+      </section>
+
+      <section class="widget__messages">
+        <ul id="messageList" class="message-list"></ul>
+      </section>
+
+      <form id="messageForm" class="widget__composer">
+        <input
+          id="messageInput"
+          type="text"
+          placeholder="Type a message"
+          maxlength="2000"
+          autocomplete="off"
+          disabled
+        />
+        <button id="sendBtn" type="submit" disabled>Send</button>
+      </form>
+    </main>
+
+    <script type="module" src="./src/main.js"></script>
+  </body>
+</html>

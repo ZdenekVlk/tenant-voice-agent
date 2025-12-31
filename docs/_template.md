@@ -1,7 +1,8 @@
 # Stage <NN>: <Název etapy>
 
 > Soubor pojmenuj: `docs/stages/<NN>-<kebab-case>.md`  
-> Příklad: `docs/stages/03-widget-session.md`
+> Příklad: `docs/stages/03-widget-session.md`  
+> Production checklist (later): Pokud během práce na stage narazíš na cokoli, co bude potřeba upravit pro produkci (CORS, domény, security, rate limiting, observability, migrace/indexy, secrets, deploy), přidej to do sekce `## Production checklist (later)` v tomto stage dokumentu. Pokud nic relevantního není, napiš `- (none)`.
 
 ## Kontext
 - Proč tato etapa existuje (1–3 věty).
@@ -69,3 +70,5 @@
 - ADR: …
 - Stage předtím: …
 - DB schema: …
+
+
