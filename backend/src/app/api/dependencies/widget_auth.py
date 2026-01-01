@@ -71,6 +71,9 @@ def require_widget_session(
         context.conversation_id,
     )
 
+    request.state.tenant_id = str(context.tenant_id)
+    request.state.conversation_id = str(context.conversation_id)
+
     return context
 
 
