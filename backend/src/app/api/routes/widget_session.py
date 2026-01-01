@@ -6,9 +6,13 @@ from fastapi import APIRouter, Depends, HTTPException, Request
 from sqlalchemy import text
 from sqlalchemy.orm import Session
 
+from app.core.config import get_settings
 from app.core.db import get_db
+from app.core.rate_limiter import check_rate_limit
 from app.core.security import create_widget_session_token
+from app.utils.client_ip import get_client_ip
 from app.utils.origin import normalize_origin
+from app.utils.request_id import get_or_create_request_id
 
 router = APIRouter()
 logger = logging.getLogger(__name__)
@@ -38,6 +42,54 @@ def create_widget_session(request: Request, db: Session = Depends(get_db)) -> di
         raise HTTPException(status_code=403, detail="domain_not_allowed")
 
     tenant_id = tenant_row[0]
+    settings = get_settings()
+    request_id = get_or_create_request_id(request)
+    route = request.url.path
+
+    tenant_key = f"tenant:{tenant_id}:{route}"
+    allowed, retry_after = check_rate_limit(tenant_key, settings.rate_limit_session_tenant)
+    if not allowed:
+        logger.warning(
+            "blocked",
+            extra={
+                "reason": "rate_limit",
+                "scope": "tenant",
+                "route": route,
+                "tenant_id": str(tenant_id),
+                "request_id": request_id,
+            },
+        )
+        raise HTTPException(
+            status_code=429,
+            detail="rate_limited",
+            headers={"Retry-After": str(retry_after), "X-Request-Id": request_id},
+        )
+
+    client_ip = get_client_ip(request)
+    if client_ip:
+        ip_key = f"ip:{client_ip}:{route}"
+        allowed, retry_after = check_rate_limit(ip_key, settings.rate_limit_session_ip)
+        if not allowed:
+            logger.warning(
+                "blocked",
+                extra={
+                    "reason": "rate_limit",
+                    "scope": "ip",
+                    "route": route,
+                    "tenant_id": str(tenant_id),
+                    "request_id": request_id,
+                },
+            )
+            raise HTTPException(
+                status_code=429,
+                detail="rate_limited",
+                headers={"Retry-After": str(retry_after), "X-Request-Id": request_id},
+            )
+    else:
+        logger.info(
+            "rate_limit_ip_missing",
+            extra={"route": route, "tenant_id": str(tenant_id), "request_id": request_id},
+        )
 
     try:
         result = db.execute(

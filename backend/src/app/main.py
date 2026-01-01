@@ -2,6 +2,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from app.api.routes import routers
+from app.middleware.payload_limit import PayloadLimitMiddleware
 
 
 def create_app() -> FastAPI:
@@ -13,6 +14,7 @@ def create_app() -> FastAPI:
         allow_methods=["*"],
         allow_headers=["*"],
     )
+    app.add_middleware(PayloadLimitMiddleware)
 
     for router in routers:
         app.include_router(router)

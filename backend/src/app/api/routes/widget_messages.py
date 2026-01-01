@@ -5,20 +5,24 @@ import logging
 from typing import Any
 from uuid import UUID
 
-from fastapi import APIRouter, Depends, HTTPException, Query
+from fastapi import APIRouter, Depends, HTTPException, Query, Request
 from pydantic import BaseModel, Field
 from sqlalchemy import text
 from sqlalchemy.orm import Session
 
 from app.api.dependencies.widget_auth import WidgetSessionContext, require_widget_session
+from app.core.config import get_settings
 from app.core.db import get_db
+from app.core.rate_limiter import check_rate_limit
+from app.utils.client_ip import get_client_ip
+from app.utils.request_id import get_or_create_request_id
 
 router = APIRouter()
 logger = logging.getLogger(__name__)
 
 
 class WidgetMessageCreateRequest(BaseModel):
-    text: str = Field(..., max_length=2000)
+    text: str = Field(...)
     metadata: dict[str, Any] | None = None
 
 
@@ -82,6 +86,7 @@ def list_widget_messages(
 
 @router.post("/widget/messages")
 def create_widget_message(
+    request: Request,
     payload: WidgetMessageCreateRequest,
     session: WidgetSessionContext = Depends(require_widget_session),
     db: Session = Depends(get_db),
@@ -89,6 +94,83 @@ def create_widget_message(
     trimmed_text = payload.text.strip()
     if not trimmed_text:
         raise HTTPException(status_code=400, detail="invalid_text")
+
+    settings = get_settings()
+    request_id = get_or_create_request_id(request)
+    route = request.url.path
+
+    if len(trimmed_text) > settings.max_message_text_len:
+        logger.warning(
+            "blocked",
+            extra={
+                "reason": "payload_text_length",
+                "route": route,
+                "tenant_id": str(session.tenant_id),
+                "conversation_id": str(session.conversation_id),
+                "request_id": request_id,
+                "max_length": settings.max_message_text_len,
+                "length": len(trimmed_text),
+            },
+        )
+        raise HTTPException(
+            status_code=400,
+            detail="text_too_long",
+            headers={"X-Request-Id": request_id},
+        )
+
+    tenant_key = f"tenant:{session.tenant_id}:{route}"
+    allowed, retry_after = check_rate_limit(
+        tenant_key, settings.rate_limit_messages_tenant
+    )
+    if not allowed:
+        logger.warning(
+            "blocked",
+            extra={
+                "reason": "rate_limit",
+                "scope": "tenant",
+                "route": route,
+                "tenant_id": str(session.tenant_id),
+                "conversation_id": str(session.conversation_id),
+                "request_id": request_id,
+            },
+        )
+        raise HTTPException(
+            status_code=429,
+            detail="rate_limited",
+            headers={"Retry-After": str(retry_after), "X-Request-Id": request_id},
+        )
+
+    client_ip = get_client_ip(request)
+    if client_ip:
+        ip_key = f"ip:{client_ip}:{route}"
+        allowed, retry_after = check_rate_limit(ip_key, settings.rate_limit_messages_ip)
+        if not allowed:
+            logger.warning(
+                "blocked",
+                extra={
+                    "reason": "rate_limit",
+                    "scope": "ip",
+                    "route": route,
+                    "tenant_id": str(session.tenant_id),
+                    "conversation_id": str(session.conversation_id),
+                    "request_id": request_id,
+                },
+            )
+            raise HTTPException(
+                status_code=429,
+                detail="rate_limited",
+                headers={"Retry-After": str(retry_after), "X-Request-Id": request_id},
+            )
+    else:
+        logger.info(
+            "rate_limit_ip_missing",
+            extra={
+                "route": route,
+                "tenant_id": str(session.tenant_id),
+                "conversation_id": str(session.conversation_id),
+                "request_id": request_id,
+            },
+        )
 
     metadata = payload.metadata or {}
 
